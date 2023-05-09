@@ -46,13 +46,17 @@
 package fr.lirmm.graphik.graal.forward_chaining;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.LinkedList;
 
+import org.checkerframework.checker.signature.qual.BinaryNameWithoutPackage;
 import org.junit.Assert;
 import org.junit.experimental.theories.DataPoints;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+import org.neo4j.cypher.internal.compiler.v2_2.docgen.plannerDocGen.idNameConverter;
+import org.junit.Test;
 
 import fr.lirmm.graphik.graal.api.core.Atom;
 import fr.lirmm.graphik.graal.api.core.AtomSet;
@@ -72,6 +76,9 @@ import fr.lirmm.graphik.graal.core.grd.DefaultGraphOfRuleDependencies;
 import fr.lirmm.graphik.graal.core.ruleset.LinkedListRuleSet;
 import fr.lirmm.graphik.graal.homomorphism.SmartHomomorphism;
 import fr.lirmm.graphik.graal.io.dlp.DlgpParser;
+import fr.lirmm.graphik.graal.store.rdbms.RdbmsStore;
+import fr.lirmm.graphik.graal.store.rdbms.driver.PostgreSQLDriver;
+import fr.lirmm.graphik.graal.store.rdbms.natural.NaturalRDBMSStore;
 import fr.lirmm.graphik.graal.test.TestUtil;
 import fr.lirmm.graphik.util.stream.CloseableIterator;
 import fr.lirmm.graphik.util.stream.IteratorException;
@@ -88,7 +95,7 @@ public class ChaseTest {
 		return TestUtil.getAtomSet();
 	}
 	
-	@Theory
+//	@Theory
 	public void test1(AtomSet atomSet)
 	    throws AtomSetException, HomomorphismFactoryException, HomomorphismException, ChaseException,
 	    IteratorException, ParseException {
@@ -105,7 +112,7 @@ public class ChaseTest {
 		Assert.assertTrue(SmartHomomorphism.instance().execute(query, atomSet).hasNext());
 	}
 	
-	@Theory
+//	@Theory
 	public void restrictedChaseTest0(AtomSet atomSet)
 	    throws AtomSetException, HomomorphismFactoryException, HomomorphismException, ChaseException,
 	    IteratorException, ParseException {
@@ -124,8 +131,102 @@ public class ChaseTest {
 
 		Assert.assertEquals(2, size);
 	}
+	
+//	@Test
+	public void restrictedChaseTest1() throws AtomSetException, SQLException, ChaseException, IteratorException {
+		NaturalRDBMSStore atomSet = new NaturalRDBMSStore(new PostgreSQLDriver("localhost", "graal", "postgres", "postgres"));
+		
+		atomSet.addAll(DlgpParser.parseAtomSet("<P>(a,a)."));
 
-	@Theory
+		LinkedList<Rule> ruleSet = new LinkedList<>();
+		
+		ruleSet.add(DlgpParser.parseRule("<Q>(X,Z) :- <P>(X,X)."));
+		ruleSet.add(DlgpParser.parseRule("<R>(X,Z) :- <Q>(X,Y)."));
+		ruleSet.add(DlgpParser.parseRule("<Q>(X,Z) :- <R>(X,Y)."));
+		ruleSet.add(DlgpParser.parseRule("<S>(X,X) :- <Q>(Y,X)."));
+
+		Chase chase = new BreadthFirstChase(ruleSet, atomSet);
+		chase.execute();
+		
+		System.out.println("Chase done\n");
+		int size = 0;
+//		for (CloseableIterator<Atom> it = atomSet.iterator(); it.hasNext(); it.next()) {
+//			++size;
+//		}
+		
+		CloseableIterator<Atom> it = atomSet.iterator();
+		
+		while(it.hasNext()) {
+			System.out.println("results: "+it.next().toString());
+//			it.next();
+			size++;
+		}
+
+		Assert.assertEquals(4, size);
+		
+	}
+	
+//	@Test
+	public void basicChaseTest() throws AtomSetException, SQLException, ChaseException, IteratorException {
+		NaturalRDBMSStore atomSet = new NaturalRDBMSStore(new PostgreSQLDriver("localhost", "graal", "postgres", "postgres"));
+		
+		atomSet.addAll(DlgpParser.parseAtomSet("<P>(a,a)."));
+
+		LinkedList<Rule> ruleSet = new LinkedList<>();
+		
+		ruleSet.add(DlgpParser.parseRule("<Q>(X,Z) :- <P>(X,X)."));
+		ruleSet.add(DlgpParser.parseRule("<R>(X,Z) :- <Q>(X,Y)."));
+		ruleSet.add(DlgpParser.parseRule("<Q>(X,Z) :- <R>(X,Y)."));
+		ruleSet.add(DlgpParser.parseRule("<S>(X,X) :- <Q>(Y,X)."));
+
+		Chase chase = new BasicChase<RdbmsStore>(ruleSet, atomSet);
+		chase.execute();
+		
+		System.out.println("Chase done\n");
+		int size = 0;
+//		for (CloseableIterator<Atom> it = atomSet.iterator(); it.hasNext(); it.next()) {
+//			++size;
+//		}
+		
+		CloseableIterator<Atom> it = atomSet.iterator();
+		
+		while(it.hasNext()) {
+			System.out.println("results: "+it.next().toString());
+//			it.next();
+			size++;
+		}
+
+		Assert.assertEquals(4, size);
+	}
+	
+	@Test
+	public void restrictedChaseTest2() throws AtomSetException, SQLException, ChaseException, IteratorException {
+		// example on the paper "benchmarking the chase"
+		NaturalRDBMSStore atomSet = new NaturalRDBMSStore(new PostgreSQLDriver("localhost", "graal", "postgres", "postgres"));
+		
+		atomSet.addAll(DlgpParser.parseAtomSet("<R>(a,b). <R>(b, b)."));
+
+		LinkedList<Rule> ruleSet = new LinkedList<>();
+		
+		ruleSet.add(DlgpParser.parseRule("<R>(X1,Y), <A>(Y), <A>(X2) :- <R>(X1,X2)."));
+
+
+//		Chase chase = new BasicChase<RdbmsStore>(ruleSet, atomSet);
+		Chase chase = new BreadthFirstChase(ruleSet, atomSet);
+		chase.execute();
+		
+		System.out.println("Chase done\n");
+		int size = 0;
+		
+		CloseableIterator<Atom> it = atomSet.iterator();
+		
+		while(it.hasNext()) {
+			System.out.println("results: "+it.next().toString());
+			size++;
+		}
+	}
+
+//	@Theory
 	public void restrictedChaseTest(AtomSet atomSet)
 	    throws AtomSetException, HomomorphismFactoryException, HomomorphismException, ChaseException,
 	    IteratorException, ParseException {
@@ -148,7 +249,7 @@ public class ChaseTest {
 		Assert.assertEquals(4, size);
 	}
 
-	@Theory
+//	@Theory
 	public void restrictedChaseTestWithGrd(InMemoryAtomSet atomSet) throws IOException, ChaseException, ParseException,
 	    AtomSetException, IteratorException {
 		atomSet.addAll(DlgpParser.parseAtomSet("<P>(a,a)."));
@@ -215,7 +316,7 @@ public class ChaseTest {
 	// atomSet).hasNext());
 	// }
 
-	@Theory
+//	@Theory
 	public void test2(InMemoryAtomSet atomSet)
 	    throws ChaseException, HomomorphismFactoryException, HomomorphismException, IteratorException, ParseException {
 

@@ -79,6 +79,7 @@ import fr.lirmm.graphik.graal.homomorphism.scheduler.ComparableOrderScheduler;
 import fr.lirmm.graphik.graal.store.gdb.Neo4jStore;
 import fr.lirmm.graphik.graal.store.rdbms.adhoc.AdHocRdbmsStore;
 import fr.lirmm.graphik.graal.store.rdbms.driver.HSQLDBDriver;
+import fr.lirmm.graphik.graal.store.rdbms.driver.PostgreSQLDriver;
 import fr.lirmm.graphik.graal.store.rdbms.natural.NaturalRDBMSStore;
 import fr.lirmm.graphik.graal.store.triplestore.rdf4j.RDF4jStore;
 
@@ -164,8 +165,12 @@ public final class TestUtil {
 				plainTableRDBMSStore.close();
 			}
 
-			defaultRDBMSStore = new AdHocRdbmsStore(new HSQLDBDriver(DEFAULT_RDBMS_TEST, null));
-			plainTableRDBMSStore = new NaturalRDBMSStore(new HSQLDBDriver(PLAIN_TABLE_RDBMS_TEST, null));
+//			defaultRDBMSStore = new AdHocRdbmsStore(new HSQLDBDriver(DEFAULT_RDBMS_TEST, null));
+//			plainTableRDBMSStore = new NaturalRDBMSStore(new HSQLDBDriver(PLAIN_TABLE_RDBMS_TEST, null));
+			
+			// change testing RDMS to PostgreSQL
+			defaultRDBMSStore = new AdHocRdbmsStore(new PostgreSQLDriver("localhost", "postgres", "postgres", "postgres"));
+			plainTableRDBMSStore = new NaturalRDBMSStore(new PostgreSQLDriver("localhost", "graal", "postgres", "postgres"));
 
 			defaultRDBMSStore.clear();
 			plainTableRDBMSStore.clear();

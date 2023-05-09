@@ -103,6 +103,7 @@ public abstract class AbstractRdbmsDriver implements RdbmsDriver {
 	@Override
 	public CloseableIterator<DBTable> getTables() throws SQLException {
 		ResultSet tables = this.getMetaData().getTables(null, null, null, TABLE_TYPE);
+		
 		return new ConverterCloseableIterator<ResultSet, DBTable>(new ResultSetCloseableIterator(tables),
 		                                                          this.converter);
 	}

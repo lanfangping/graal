@@ -239,9 +239,11 @@ public abstract class AbstractRdbmsStore extends AbstractStore implements RdbmsS
 		try {
 			int c = 0;
 			Statement statement = this.createStatement();
-
 			while (stream.hasNext()) {
-				this.add(statement, stream.next());
+				Atom atom = stream.next();
+				System.out.println("atom "+atom.toString());
+				this.add(statement, atom);
+//				this.add(statement, stream.next());
 				if (++c % MAX_BATCH_SIZE == 0) {
 					if (LOGGER.isDebugEnabled()) {
 						LOGGER.debug("batch commit, size=" + MAX_BATCH_SIZE);

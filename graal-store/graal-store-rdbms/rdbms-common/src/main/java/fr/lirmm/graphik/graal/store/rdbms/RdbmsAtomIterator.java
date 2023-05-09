@@ -100,6 +100,7 @@ class RdbmsAtomIterator implements CloseableIterator<Atom> {
 			while (this.predicateIt.hasNext()
 				   && (this.atomIt == null || !this.atomIt.hasNext())) {
 				Predicate p = predicateIt.next();
+//				System.out.println("Predicate:" + p.toString()+"\n");
 				List<Term> terms = new LinkedList<Term>();
 				VariableGenerator gen = new DefaultVariableGenerator("X");
 				for(int i=0; i<p.getArity(); ++i) {
@@ -109,12 +110,14 @@ class RdbmsAtomIterator implements CloseableIterator<Atom> {
 				InMemoryAtomSet atomSet = new LinkedListAtomSet();
 				Atom atom = new DefaultAtom(p, terms);
 				atomSet.add(atom);
+//				System.out.println(atom.toString()+"\n");
 				
 				ConjunctiveQuery query = DefaultConjunctiveQueryFactory.instance().create(atomSet);
-				
+//				System.out.println("query:"+query.toString());
 				SqlHomomorphism solver = SqlHomomorphism.instance();
 				try {
 					this.atomIt = new SubstitutionIterator2AtomIterator(atom, solver.execute(query, this.store));
+					
 				} catch (HomomorphismException e) {
 					throw new IteratorException(e);
 				}

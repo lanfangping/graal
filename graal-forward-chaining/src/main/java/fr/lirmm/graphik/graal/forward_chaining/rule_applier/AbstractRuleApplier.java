@@ -120,17 +120,19 @@ public abstract class AbstractRuleApplier<T extends AtomSet> implements RuleAppl
 	public boolean apply(Rule rule, T atomSet) throws RuleApplicationException {
 		boolean isChanged = false;
 		Query query = this.generateQuery(rule);
-
+		System.out.println("ab rule applier:" + query.toString());
 		try {
 			CloseableIterator<Substitution> subIt = this.executeQuery(query, atomSet);
 			while (subIt.hasNext()) {
 				Substitution substitution = subIt.next();
+				System.out.println("substitution: " + substitution.toString());
 				CloseableIterator<Atom> it = this.getHaltingCondition().apply(rule, substitution, atomSet);
 				if (it.hasNext()) {
 					atomSet.addAll(it);
 					isChanged = true;
 				}
 			}
+			System.out.println("\n");
 			subIt.close();
 		} catch (HomomorphismFactoryException e) {
 			throw new RuleApplicationException("Error during rule application", e);

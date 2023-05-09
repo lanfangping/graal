@@ -120,7 +120,7 @@ public class SmartHomomorphism extends AbstractProfilable implements Homomorphis
 	public CloseableIterator<Substitution> execute(Object query, AtomSet atomSet) throws HomomorphismException {
 		if (LOGGER.isDebugEnabled())
 			LOGGER.debug("Execute query: {}", query);
-
+		System.out.println("2. Execute query1: " + query);
 		for (HomomorphismChecker e : elements) {
 			if (e.check(query, atomSet)) {
 				@SuppressWarnings("unchecked")

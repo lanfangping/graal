@@ -198,6 +198,7 @@ public class NaturalRDBMSStore extends AbstractRdbmsStore {
 	public CloseableIterator<Predicate> predicatesIterator() throws AtomSetException {
 		try {
 			CloseableIterator<DBTable> tables = this.getDriver().getTables();
+		
 			return new ConverterCloseableIterator<DBTable, Predicate>(tables, DBTable2PredicateConverter.instance());
 		} catch (SQLException e) {
 			throw new AtomSetException("Error during querying for table names", e);

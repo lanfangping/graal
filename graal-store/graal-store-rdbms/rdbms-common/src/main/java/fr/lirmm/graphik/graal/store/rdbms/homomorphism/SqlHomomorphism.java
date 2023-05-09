@@ -110,6 +110,7 @@ public final class SqlHomomorphism extends AbstractHomomorphism<Query, RdbmsStor
 
 		try {
 			sqlQuery = store.getConjunctiveQueryTranslator().translate(varMap.createImageOf(cquery), s);
+//			System.out.println("GENERATED SQL QUERY: \n" + cquery + "\n" + sqlQuery);
 			if (LOGGER.isDebugEnabled())
 				LOGGER.debug("GENERATED SQL QUERY: \n" + cquery + "\n" + sqlQuery);
 		} catch (AtomSetException e) {
@@ -121,6 +122,7 @@ public final class SqlHomomorphism extends AbstractHomomorphism<Query, RdbmsStor
 			return Iterators.<Substitution> singletonIterator(Substitutions.emptySubstitution());
 		} else {
 			try {
+//				System.out.println("sqlQuery.toString():"+sqlQuery.toString());
 				ResultSet results = store.getDriver().createStatement().executeQuery(sqlQuery.toString());
 				CloseableIterator<ResultSet> resultsIt = new ResultSetCloseableIterator(results);
 				return new ConverterCloseableIterator<ResultSet, Substitution>(resultsIt,

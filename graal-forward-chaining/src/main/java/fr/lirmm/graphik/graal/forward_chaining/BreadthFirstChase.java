@@ -174,7 +174,7 @@ public class BreadthFirstChase extends AbstractChase<Rule, AtomSet> {
 				}
 
 				for (Entry<Rule, AtomSet> e : this.rulesToCheck.entrySet()) {
-
+					System.out.println("for loop");
 					String key = null;
 					Rule rule = e.getKey();
 					AtomSet data = e.getValue();
@@ -195,7 +195,9 @@ public class BreadthFirstChase extends AbstractChase<Rule, AtomSet> {
 				}
 
 				this.dispatchNewData(this.tmpData);
+				
 				this.atomSet.addAll(this.tmpData);
+				System.out.println("here");
 				this.tmpData.clear();
 
 				if (this.getProfiler().isProfilingEnabled()) {
@@ -222,6 +224,7 @@ public class BreadthFirstChase extends AbstractChase<Rule, AtomSet> {
 			Atom a = it.next();
 			Predicate p = a.getPredicate();
 			for (Rule r : ruleSet.getRulesByBodyPredicate(p)) {
+				System.out.println("rule"+r.toString());
 				if (linearRuleCheck(r)) {
 					AtomSet set = nextRulesToCheck.get(r);
 					if (set == null) {

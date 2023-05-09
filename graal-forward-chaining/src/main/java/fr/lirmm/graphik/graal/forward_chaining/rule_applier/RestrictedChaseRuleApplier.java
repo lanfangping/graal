@@ -42,6 +42,8 @@
  */
 package fr.lirmm.graphik.graal.forward_chaining.rule_applier;
 
+import java.sql.ResultSet;
+
 import fr.lirmm.graphik.graal.api.core.Atom;
 import fr.lirmm.graphik.graal.api.core.AtomSet;
 import fr.lirmm.graphik.graal.api.core.AtomSetException;
@@ -108,6 +110,26 @@ public class RestrictedChaseRuleApplier<T extends AtomSet> implements RuleApplie
 	public  CloseableIterator<Atom> delegatedApply(Rule rule, T atomSet) throws RuleApplicationException {
 		try {
 			ConjunctiveQueryWithNegatedParts query = new RuleWrapper2ConjunctiveQueryWithNegatedParts(rule);
+			System.out.println("1. Query123:" + query.toString() +"\n");
+			
+			//showing substitutions
+			CloseableIterator<Substitution> tmp_results = SmartHomomorphism.instance().execute(query, atomSet);
+			try {
+				while(tmp_results.hasNext()) {
+					Substitution substitution = null;
+					try {
+						substitution = tmp_results.next();
+					} catch (IteratorException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					System.out.println("2.1. substitution: "+ substitution.toString());
+				}
+			} catch (IteratorException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			System.out.println("2.2. \n");
 			CloseableIterator<Substitution> results = SmartHomomorphism.instance().execute(query, atomSet);
 			return new RuleApplierIterator(results, rule, atomSet);
 		} catch (HomomorphismException e) {
@@ -119,8 +141,10 @@ public class RestrictedChaseRuleApplier<T extends AtomSet> implements RuleApplie
 	public  CloseableIterator<Atom> delegatedApply(Rule rule, T atomSetOnWichQuerying, T atomSetOnWichCheck)
 	    throws RuleApplicationException {
 		if(atomSetOnWichQuerying == atomSetOnWichCheck) {
+//			System.out.println("here1");
 			return this.delegatedApply(rule, atomSetOnWichQuerying);
 		} else {
+//			System.out.println("here2");
 			return FALLBACK.delegatedApply(rule, atomSetOnWichQuerying, atomSetOnWichCheck);
 		}
 	}
